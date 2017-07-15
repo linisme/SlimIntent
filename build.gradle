@@ -36,6 +36,7 @@ ext {
     groupId = 'net.idik.slimintent'
     uploadName = 'SlimIntent'
     publishVersion = '0.0.1'
+    publishVersionCode = 1
     description = 'SlimIntent'
     website = 'https://github.com/MEiDIK/SlimIntent'
     licences = ['MIT']
