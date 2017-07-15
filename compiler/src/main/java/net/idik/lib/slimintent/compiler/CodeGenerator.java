@@ -4,6 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 
@@ -19,6 +20,7 @@ import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Modifier;
 
+import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
 
@@ -44,6 +46,14 @@ class CodeGenerator {
 
     boolean generate() {
 
+        generateAutoIntentType();
+
+        generateSlimIntentType();
+
+        return true;
+    }
+
+    private void generateSlimIntentType() {
         TypeSpec.Builder builder = classBuilder(CLASS_NAME_SLIM_INTENT)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
@@ -59,19 +69,18 @@ class CodeGenerator {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        return true;
     }
 
 
     private void generateToGoMethod(TypeSpec.Builder typeBuilder, IntentData intentData) {
         ClassName intentClass = ClassName.get("android.content", "Intent");
         ClassName targetClass = ClassName.get(intentData.typeElement);
+        ClassName autoActivityClass = ClassName.get(PACKAGE_NAME_SLIM_INTENT, "AutoActivityIntent");
         MethodSpec.Builder toMethodBuilder = methodBuilder("to" + targetClass.simpleName())
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(ClassName.get("android.content", "Context"), "context")
                 .addStatement("Intent intent = new $T(context, $L.class)", intentClass, targetClass)
-                .returns(intentClass);
+                .returns(autoActivityClass);
 
         if (intentData.argDatas != null && intentData.argDatas.size() > 0) {
 
@@ -105,7 +114,9 @@ class CodeGenerator {
             }
         }
 
-        toMethodBuilder.addStatement("return intent");
+        toMethodBuilder.addStatement("$T autoIntent = new $T(intent)", autoActivityClass, autoActivityClass);
+
+        toMethodBuilder.addStatement("return autoIntent");
         typeBuilder.addMethod(toMethodBuilder.build());
 
     }
@@ -130,6 +141,103 @@ class CodeGenerator {
 
 
         typeBuilder.addMethod(bindingMethodBuilder.build());
+
+    }
+
+    private void generateAutoIntentType() {
+        TypeSpec.Builder autoIntentTypeBuilder = classBuilder("AutoActivityIntent")
+                .addModifiers(Modifier.FINAL, Modifier.PUBLIC);
+
+        ClassName autoActivityIntentClassName = ClassName.get(PACKAGE_NAME_SLIM_INTENT, "AutoActivityIntent");
+
+        autoIntentTypeBuilder.addField(ClassName.get("android.content", "Intent"), "intent", Modifier.PRIVATE, Modifier.FINAL);
+
+        MethodSpec.Builder constructorBuilder = constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(ClassName.get("android.content", "Intent"), "intent")
+                .addStatement("this.$N = $N", "intent", "intent");
+        autoIntentTypeBuilder.addMethod(constructorBuilder.build());
+
+        MethodSpec.Builder startMethodBuilder = methodBuilder("start")
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(ClassName.get("android.content", "Context"), "context")
+                .addStatement("context.startActivity(intent)");
+        autoIntentTypeBuilder.addMethod(startMethodBuilder.build());
+
+        startMethodBuilder = methodBuilder("start")
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(ClassName.get("android.app", "Fragment"), "fragment")
+                .addStatement("fragment.startActivity(intent)");
+        autoIntentTypeBuilder.addMethod(startMethodBuilder.build());
+
+        startMethodBuilder = methodBuilder("start")
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(ClassName.get("android.support.v4.app", "Fragment"), "fragment")
+                .addStatement("fragment.startActivity(intent)");
+        autoIntentTypeBuilder.addMethod(startMethodBuilder.build());
+
+
+        MethodSpec.Builder getMethodBuilder = methodBuilder("getIntent")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(ClassName.get("android.content", "Intent"))
+                .addStatement("return intent");
+        autoIntentTypeBuilder.addMethod(getMethodBuilder.build());
+
+        MethodSpec.Builder addFlagsMethodBuilder = methodBuilder("addFlags")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(autoActivityIntentClassName)
+                .addParameter(int.class, "flags")
+                .addStatement("intent.addFlags(flags)")
+                .addStatement("return this");
+        autoIntentTypeBuilder.addMethod(addFlagsMethodBuilder.build());
+
+        MethodSpec.Builder setFlagsMethodBuilder = methodBuilder("setFlags")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(autoActivityIntentClassName)
+                .addParameter(int.class, "flags")
+                .addStatement("intent.setFlags(flags)")
+                .addStatement("return this");
+        autoIntentTypeBuilder.addMethod(setFlagsMethodBuilder.build());
+
+        MethodSpec.Builder setActionMethodBuilder = methodBuilder("setAction")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(autoActivityIntentClassName)
+                .addParameter(String.class, "action")
+                .addStatement("intent.setAction(action)")
+                .addStatement("return this");
+        autoIntentTypeBuilder.addMethod(setActionMethodBuilder.build());
+
+        MethodSpec.Builder addCategoryMethodBuilder = methodBuilder("addCategory")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(autoActivityIntentClassName)
+                .addParameter(String.class, "category")
+                .addStatement("intent.addCategory(category)")
+                .addStatement("return this");
+        autoIntentTypeBuilder.addMethod(addCategoryMethodBuilder.build());
+
+        MethodSpec.Builder setDataMethodBuilder = methodBuilder("setData")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(autoActivityIntentClassName)
+                .addParameter(ClassName.get("android.net", "Uri"), "data")
+                .addStatement("intent.setData(data)")
+                .addStatement("return this");
+        autoIntentTypeBuilder.addMethod(setDataMethodBuilder.build());
+
+        setDataMethodBuilder = methodBuilder("setDataAndType")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(autoActivityIntentClassName)
+                .addParameter(ClassName.get("android.net", "Uri"), "data")
+                .addParameter(String.class, "type")
+                .addStatement("intent.setDataAndType(data, type)")
+                .addStatement("return this");
+        autoIntentTypeBuilder.addMethod(setDataMethodBuilder.build());
+
+        JavaFile file = JavaFile.builder(PACKAGE_NAME_SLIM_INTENT, autoIntentTypeBuilder.build()).build();
+        try {
+            file.writeTo(filer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 

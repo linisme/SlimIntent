@@ -15,6 +15,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        startActivity(SlimIntent.toUserCenterActivity(this, 23, "好呀"));
+        SlimIntent.toUserCenterActivity(this, 34).start(this);
     }
 }

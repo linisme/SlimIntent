@@ -1,7 +1,9 @@
 package net.idik.lib.slimintent.example;
 
+import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -13,10 +15,10 @@ import net.idik.lib.slimintent.annotations.AutoIntent;
 @AutoIntent
 public class UserCenterActivity extends AppCompatActivity {
 
+
     @IntentArg
     int userId;
 
-    @IntentArg
     String book;
 
     @Override
@@ -24,7 +26,6 @@ public class UserCenterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_center);
         SlimIntent.bind(this);
-        System.out.println(userId + "   ::::   " + book);
     }
 
     public static class Book implements Parcelable {
