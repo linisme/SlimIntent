@@ -10,8 +10,10 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
+import javax.swing.text.html.parser.DTD;
 
 /**
  * Created by linshuaibin on 2017/7/10.
@@ -51,7 +53,7 @@ public class IntentData {
             name = element.getSimpleName().toString();
             key = (className + ".ARG." + name).replace('.', '_').toUpperCase();
             this.element = element;
-            this.type = element.asType();
+            type = element.asType();
         }
     }
 

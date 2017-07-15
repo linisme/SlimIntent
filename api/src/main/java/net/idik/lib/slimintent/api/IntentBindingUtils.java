@@ -1,6 +1,7 @@
 package net.idik.lib.slimintent.api;
 
 import android.content.Intent;
+import android.os.Parcelable;
 
 import java.util.HashMap;
 
@@ -110,8 +111,25 @@ public class IntentBindingUtils {
         } else if ("boolean".equals(type)) {
             type = "java.lang.Boolean";
         }
+        ITypeDataExtrator extrator = extratorMap.get(type);
+        if (extrator != null) {
+            return (T) extrator.extrat(intent, key, type, defaultValue);
+        } else try {
+            if (Parcelable.class.isAssignableFrom(Class.forName(type))) {
+                return intent.getParcelableExtra(key);
+            }
+        } catch (ClassNotFoundException e) {
+            try {
+                int pos = type.lastIndexOf(".");
+                type = type.substring(0, pos) + "$" + type.substring(pos + 1);
+                if (Parcelable.class.isAssignableFrom(Class.forName(type))) {
+                    return intent.getParcelableExtra(key);
+                }
+            } catch (ClassNotFoundException e1) {
+                e1.printStackTrace();
+            }
+        }
 
-
-        return (T) extratorMap.get(type).extrat(intent, key, type, defaultValue);
+        return null;
     }
 }

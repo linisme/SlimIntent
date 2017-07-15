@@ -1,9 +1,7 @@
 package net.idik.lib.slimintent.example;
 
-import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
@@ -50,7 +48,8 @@ public class UserCenterActivity extends AppCompatActivity {
     @IntentArg
     char h;
 
-    String book;
+    @IntentArg
+    Book book;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +79,25 @@ public class UserCenterActivity extends AppCompatActivity {
 
     public static class Book implements Parcelable {
 
+        String name;
+        float price;
+
+        public Book(String name, float price) {
+            this.name = name;
+            this.price = price;
+        }
+
+        public Book() {
+        }
+
+        @Override
+        public String toString() {
+            return "Book{" +
+                    "name='" + name + '\'' +
+                    ", price=" + price +
+                    '}';
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -87,15 +105,16 @@ public class UserCenterActivity extends AppCompatActivity {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-        }
-
-        public Book() {
+            dest.writeString(this.name);
+            dest.writeFloat(this.price);
         }
 
         protected Book(Parcel in) {
+            this.name = in.readString();
+            this.price = in.readFloat();
         }
 
-        public static final Parcelable.Creator<Book> CREATOR = new Parcelable.Creator<Book>() {
+        public static final Creator<Book> CREATOR = new Creator<Book>() {
             @Override
             public Book createFromParcel(Parcel source) {
                 return new Book(source);
@@ -107,5 +126,4 @@ public class UserCenterActivity extends AppCompatActivity {
             }
         };
     }
-
 }
