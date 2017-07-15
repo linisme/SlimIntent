@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.TextView;
 
 import net.idik.lib.slimintent.R;
 import net.idik.lib.slimintent.SlimIntent;
@@ -19,6 +20,36 @@ public class UserCenterActivity extends AppCompatActivity {
     @IntentArg
     int userId;
 
+    @IntentArg
+    float a;
+
+    @IntentArg
+    double b;
+
+    @IntentArg
+    long d;
+
+    @IntentArg
+    Integer e;
+
+    @IntentArg
+    Float f;
+
+    @IntentArg
+    Double g;
+
+    @IntentArg
+    Long l;
+
+    @IntentArg
+    String i;
+
+    @IntentArg
+    CharSequence j;
+
+    @IntentArg
+    char h;
+
     String book;
 
     @Override
@@ -26,6 +57,25 @@ public class UserCenterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_center);
         SlimIntent.bind(this);
+        ((TextView) findViewById(R.id.textView)).setText(this.toString());
+    }
+
+    @Override
+    public String toString() {
+        return "UserCenterActivity{" +
+                "userId=" + userId +
+                ", a=" + a +
+                ", b=" + b +
+                ", d=" + d +
+                ", e=" + e +
+                ", f=" + f +
+                ", g=" + g +
+                ", l=" + l +
+                ", i='" + i + '\'' +
+                ", j=" + j +
+                ", h=" + h +
+                ", book='" + book + '\'' +
+                '}';
     }
 
     public static class Book implements Parcelable {
