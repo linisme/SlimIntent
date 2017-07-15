@@ -11,6 +11,7 @@ buildscript {
         // in the individual module build.gradle files
 
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
+        classpath 'com.novoda:bintray-release:0.4.0'
     }
 }
 
@@ -22,4 +23,21 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+ext {
+    bintrayUser = properties.getProperty("bintray.user")
+    bintrayKey = properties.getProperty("bintray.apikey")
+    repoName = "SlimIntent"
+    userOrg = 'idik-net'
+    groupId = 'net.idik.slimintent'
+    uploadName = 'SlimIntent'
+    publishVersion = '0.0.1'
+    description = 'SlimIntent'
+    website = 'https://github.com/MEiDIK/SlimIntent'
+    licences = ['MIT']
+    dryRun = 'false'
 }

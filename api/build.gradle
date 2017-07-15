@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 //apply plugin: 'com.android.application'
+apply plugin: 'com.novoda.bintray-release'
 
 android {
     compileSdkVersion 25
@@ -31,4 +32,19 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.3.1'
     testCompile 'junit:junit:4.12'
     compile project(':annotations')
+}
+
+publish {
+    artifactId = 'api'
+    uploadName = artifactId
+    userOrg = rootProject.userOrg
+    groupId = rootProject.groupId
+    publishVersion = rootProject.publishVersion
+    description = rootProject.description
+    website = rootProject.website
+    licences = rootProject.licences
+    bintrayUser = rootProject.bintrayUser
+    bintrayKey = rootProject.bintrayKey
+    repoName = rootProject.repoName
+    dryRun = rootProject.dryRun
 }

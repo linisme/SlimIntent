@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'com.novoda.bintray-release'
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
@@ -10,3 +11,18 @@ dependencies {
 
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
+
+publish {
+    artifactId = 'compiler'
+    uploadName = artifactId
+    userOrg = rootProject.userOrg
+    groupId = rootProject.groupId
+    publishVersion = rootProject.publishVersion
+    description = rootProject.description
+    website = rootProject.website
+    licences = rootProject.licences
+    bintrayUser = rootProject.bintrayUser
+    bintrayKey = rootProject.bintrayKey
+    repoName = rootProject.repoName
+    dryRun = rootProject.dryRun
+}
