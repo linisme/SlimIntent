@@ -85,13 +85,13 @@ class CodeGenerator {
         MethodSpec.Builder fragmentToMethodBuilder = methodBuilder("to" + targetClass.simpleName())
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(ClassName.get("android.app", "Fragment"), "fragment")
-                .addStatement("Intent intent = new $T(fragment.getContext(), $L.class)", intentClass, targetClass)
+                .addStatement("Intent intent = new $T(fragment.getActivity(), $L.class)", intentClass, targetClass)
                 .returns(autoActivityClass);
 
         MethodSpec.Builder v4FragmentToMethodBuilder = methodBuilder("to" + targetClass.simpleName())
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(ClassName.get("android.support.v4.app", "Fragment"), "fragment")
-                .addStatement("Intent intent = new $T(fragment.getContext(), $L.class)", intentClass, targetClass)
+                .addStatement("Intent intent = new $T(fragment.getActivity(), $L.class)", intentClass, targetClass)
                 .returns(autoActivityClass);
         if (intentData.argDatas != null && intentData.argDatas.size() > 0) {
 
