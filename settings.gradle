@@ -1,1 +1,1 @@
-include ':example', ':compiler', ':annotations', ':api'
+include ':example', ':compiler', ':annotations', ':api', ':sampleforkotlin'

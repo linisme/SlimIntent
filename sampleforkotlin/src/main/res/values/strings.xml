@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">SampleForKotlin</string>
+    <string name="title_activity_user_center">UserCenterActivity</string>
+</resources>
