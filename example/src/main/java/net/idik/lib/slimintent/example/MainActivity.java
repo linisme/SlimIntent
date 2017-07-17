@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.clickButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SlimIntent.toUserCenterActivity(MainActivity.this, 123, 32.3f, 32.3, 12, 1, 32.3f, 32.3, 2331L, "kdfj", "kdjfkdsf", '2', new UserCenterActivity.Book("鲁宾", 12.3f)).start(MainActivity.this);
+                SlimIntent.toUserCenterActivity(MainActivity.this, 123, 32.3f, 32.3, 12, 1, 32.3f, 32.3, 2331L, "kdfj", "kdjfkdsf", '2', new UserCenterActivity.Book("鲁宾", 12.3f)).start();
             }
         });
     }

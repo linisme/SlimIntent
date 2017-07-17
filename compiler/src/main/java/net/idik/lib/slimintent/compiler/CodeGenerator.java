@@ -76,12 +76,23 @@ class CodeGenerator {
         ClassName intentClass = ClassName.get("android.content", "Intent");
         ClassName targetClass = ClassName.get(intentData.typeElement);
         ClassName autoActivityClass = ClassName.get(PACKAGE_NAME_SLIM_INTENT, "AutoActivityIntent");
-        MethodSpec.Builder toMethodBuilder = methodBuilder("to" + targetClass.simpleName())
+        MethodSpec.Builder activityToMethodBuilder = methodBuilder("to" + targetClass.simpleName())
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(ClassName.get("android.content", "Context"), "context")
                 .addStatement("Intent intent = new $T(context, $L.class)", intentClass, targetClass)
                 .returns(autoActivityClass);
 
+        MethodSpec.Builder fragmentToMethodBuilder = methodBuilder("to" + targetClass.simpleName())
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addParameter(ClassName.get("android.app", "Fragment"), "fragment")
+                .addStatement("Intent intent = new $T(fragment.getContext(), $L.class)", intentClass, targetClass)
+                .returns(autoActivityClass);
+
+        MethodSpec.Builder v4FragmentToMethodBuilder = methodBuilder("to" + targetClass.simpleName())
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addParameter(ClassName.get("android.support.v4.app", "Fragment"), "fragment")
+                .addStatement("Intent intent = new $T(fragment.getContext(), $L.class)", intentClass, targetClass)
+                .returns(autoActivityClass);
         if (intentData.argDatas != null && intentData.argDatas.size() > 0) {
 
             TypeSpec.Builder binderTypeBuilder = TypeSpec.classBuilder(targetClass.simpleName() + "_SlimIntentBinder")
@@ -98,7 +109,13 @@ class CodeGenerator {
                 typeBuilder.addField(FieldSpec.builder(String.class, arg.key, Modifier.PRIVATE, Modifier.FINAL, Modifier.STATIC)
                         .initializer("$S", arg.key).build());
 
-                toMethodBuilder.addParameter(ClassName.get(arg.element.asType()), arg.name)
+                activityToMethodBuilder.addParameter(ClassName.get(arg.element.asType()), arg.name)
+                        .addStatement("intent.putExtra($L, $N)", arg.key, arg.name);
+
+                fragmentToMethodBuilder.addParameter(ClassName.get(arg.element.asType()), arg.name)
+                        .addStatement("intent.putExtra($L, $N)", arg.key, arg.name);
+
+                v4FragmentToMethodBuilder.addParameter(ClassName.get(arg.element.asType()), arg.name)
                         .addStatement("intent.putExtra($L, $N)", arg.key, arg.name);
 
                 bindMethodBuilder.addStatement("activity.$N = $T.getExtra(intent, $S, $S)", arg.name, ClassName.get("net.idik.lib.slimintent.api", "IntentBindingUtils"), arg.key, arg.type);
@@ -114,10 +131,15 @@ class CodeGenerator {
             }
         }
 
-        toMethodBuilder.addStatement("$T autoIntent = new $T(intent)", autoActivityClass, autoActivityClass);
-
-        toMethodBuilder.addStatement("return autoIntent");
-        typeBuilder.addMethod(toMethodBuilder.build());
+        activityToMethodBuilder.addStatement("$T autoIntent = new $T(context, intent)", autoActivityClass, autoActivityClass);
+        activityToMethodBuilder.addStatement("return autoIntent");
+        typeBuilder.addMethod(activityToMethodBuilder.build());
+        fragmentToMethodBuilder.addStatement("$T autoIntent = new $T(fragment, intent)", autoActivityClass, autoActivityClass);
+        fragmentToMethodBuilder.addStatement("return autoIntent");
+        typeBuilder.addMethod(fragmentToMethodBuilder.build());
+        v4FragmentToMethodBuilder.addStatement("$T autoIntent = new $T(fragment, intent)", autoActivityClass, autoActivityClass);
+        v4FragmentToMethodBuilder.addStatement("return autoIntent");
+        typeBuilder.addMethod(v4FragmentToMethodBuilder.build());
 
     }
 
@@ -151,31 +173,26 @@ class CodeGenerator {
         ClassName autoActivityIntentClassName = ClassName.get(PACKAGE_NAME_SLIM_INTENT, "AutoActivityIntent");
 
         autoIntentTypeBuilder.addField(ClassName.get("android.content", "Intent"), "intent", Modifier.PRIVATE, Modifier.FINAL);
+        autoIntentTypeBuilder.addField(ClassName.get("java.lang", "Object"), "context", Modifier.PRIVATE, Modifier.FINAL);
 
         MethodSpec.Builder constructorBuilder = constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
+                .addParameter(ClassName.get("java.lang", "Object"), "context")
                 .addParameter(ClassName.get("android.content", "Intent"), "intent")
-                .addStatement("this.$N = $N", "intent", "intent");
+                .addStatement("this.$N = $N", "intent", "intent")
+                .addStatement("this.$N = $N", "context", "context");
         autoIntentTypeBuilder.addMethod(constructorBuilder.build());
 
         MethodSpec.Builder startMethodBuilder = methodBuilder("start")
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(ClassName.get("android.content", "Context"), "context")
-                .addStatement("context.startActivity(intent)");
+                .addCode("if (context instanceof android.app.Fragment) {\n" +
+                        "    ((android.app.Fragment) context).startActivity(intent);\n" +
+                        "} else if (context instanceof android.support.v4.app.Fragment) {\n" +
+                        "    ((android.support.v4.app.Fragment) context).startActivity(intent);\n" +
+                        "} else if (context instanceof android.app.Activity) {\n" +
+                        "    ((android.app.Activity) context).startActivity(intent);\n" +
+                        "}\n");
         autoIntentTypeBuilder.addMethod(startMethodBuilder.build());
-
-        startMethodBuilder = methodBuilder("start")
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(ClassName.get("android.app", "Fragment"), "fragment")
-                .addStatement("fragment.startActivity(intent)");
-        autoIntentTypeBuilder.addMethod(startMethodBuilder.build());
-
-        startMethodBuilder = methodBuilder("start")
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(ClassName.get("android.support.v4.app", "Fragment"), "fragment")
-                .addStatement("fragment.startActivity(intent)");
-        autoIntentTypeBuilder.addMethod(startMethodBuilder.build());
-
 
         MethodSpec.Builder getMethodBuilder = methodBuilder("getIntent")
                 .addModifiers(Modifier.PUBLIC)
