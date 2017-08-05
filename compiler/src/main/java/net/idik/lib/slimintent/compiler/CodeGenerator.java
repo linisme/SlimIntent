@@ -96,6 +96,7 @@ class CodeGenerator {
         if (intentData.argDatas != null && intentData.argDatas.size() > 0) {
 
             TypeSpec.Builder binderTypeBuilder = TypeSpec.classBuilder(targetClass.simpleName() + "_SlimIntentBinder")
+                    .addModifiers(Modifier.PUBLIC)
                     .addSuperinterface(IIntentBinding.class);
 
             MethodSpec.Builder bindMethodBuilder = methodBuilder("bind")
